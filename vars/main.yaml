@@ -1,0 +1,5 @@
+---
+input_final_rules: "{{ (input_default_rules + input_rules) if input_rule_default_target != 'ACCEPT' else input_rules }}"
+output_final_rules: "{{ (output_default_rules + output_rules) if output_rule_default_target != 'ACCEPT' else output_rules }}"
+#forward_final_rules: "{{ forward_default_rules + forward_rules }}"
+

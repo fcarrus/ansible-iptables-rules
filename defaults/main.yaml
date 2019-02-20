@@ -1,0 +1,116 @@
+manage_firewall: false
+
+input_rule_default_target: ACCEPT
+output_rule_default_target: ACCEPT
+forward_rule_default_target: ACCEPT
+
+input_rules: []
+output_rules: []
+forward_rules: []
+
+input_default_rules: 
+- "{{ input_rule_loopback }}"
+- "{{ input_rule_icmp }}"
+- "{{ input_rule_established }}"
+output_default_rules: 
+- "{{ output_rule_loopback }}"
+- "{{ output_rule_icmp }}"
+- "{{ output_rule_established }}"
+forward_default_rules: []
+
+
+input_rule_loopback:
+  comment: "Loopback traffic"
+  raw: "-i lo -j ACCEPT"
+
+input_rule_icmp:
+  comment: "ICMP traffic"
+  proto: icmp
+  state: ""
+  target: "ACCEPT"
+
+input_rule_established:
+  comment: "Return traffic"
+  state: "ESTABLISHED,RELATED"
+  target: "ACCEPT"
+
+
+input_rule_ssh:
+  comment: "Allow SSH"
+  proto: "tcp"
+  target: "ACCEPT"
+
+input_rule_nagios_agent:
+  comment: "Nagios NRPE agent"
+  proto: "tcp"
+  dport: "5666"
+  source: 
+  - "10.1.2.3"
+  target: "ACCEPT"
+
+input_rule_webserver:
+  comment: "Http and Httpd server tcp"
+  proto: "tcp"
+  dport: 
+  - "80"
+  - "443"
+  target: "ACCEPT"
+
+input_rule_elastic_server:
+  comment: "Elasticsearch db server"
+  proto: "tcp"
+  dport: "9300"
+  target: "ACCEPT"
+
+# Need to fix the dynamic ports for mountd, quotad, lockd, statd
+# See https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/storage_administration_guide/#s2-nfs-nfs-firewall-config
+# and https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/storage_administration_guide/s2-nfs-nfs-firewall-config
+input_rule_nfs_server:
+  comment: "NFS Server"
+  proto:
+  - "tcp"
+  - "udp"
+  dport:
+  - "2049"
+  - "111"
+  target: "ACCEPT"
+
+
+output_rule_loopback:
+  comment: "Loopback traffic"
+  raw: "-o lo -j ACCEPT"
+
+output_rule_icmp:
+  comment: "ICMP traffic"
+  proto: icmp
+  state: ""
+  target: "ACCEPT"
+
+output_rule_established:
+  comment: "Return traffic"
+  state: "ESTABLISHED,RELATED"
+  target: "ACCEPT"
+
+output_rule_dns_queries:
+  comment: "DNS Queries and NTP"
+  proto: 
+  - "tcp"
+  - "udp"
+  destination:
+  - "10.1.2.3"
+  - "10.1.2.4"
+  dport: 
+  - "53"
+  - "123"
+  target: "ACCEPT"
+
+output_rule_ntp_client:
+  comment: "NTP Client"
+  proto: 
+  - "tcp"
+  - "udp"
+  destination:
+  - "10.1.2.5"
+  - "10.1.2.6"
+  dport: "123"
+  target: "ACCEPT"

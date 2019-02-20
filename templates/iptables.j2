@@ -1,0 +1,127 @@
+#jinja2:line_statement_prefix: '%'
+{{ ansible_managed | comment() }}
+*filter
+:INPUT {{ input_rule_default_target }} [0:0]
+:FORWARD {{ forward_rule_default_target }} [0:0]
+:OUTPUT {{ output_rule_default_target }} [0:0]
+
+%  if input_final_rules | length > 0
+# INPUT Chain
+%  endif
+
+%  for rule in input_final_rules
+%    set target = rule.target | default('ACCEPT')
+%    if rule.state is defined
+%      if rule.state == ''
+%        set newstate = ''
+%      else
+%        set newstate = '-m state --state ' + rule.state
+%      endif
+%    else
+%      set newstate = '-m state --state NEW'
+%    endif
+
+{{ '' }}
+%    if rule.comment is defined and rule.comment != ""
+%      set comment = '-m comment --comment \"' + rule.comment + '\"'
+%    else
+%      set comment = ''
+%    endif
+
+# INPUT: {{ comment }}
+%    if rule.raw is defined
+-A INPUT {{ rule.raw }}
+%    elif rule.source is defined
+%      for srcip in (rule.source is string | ternary ([rule.source], rule.source) )
+%        if rule.proto is defined
+%          for proto in (rule.proto is string | ternary ([rule.proto], rule.proto) )
+%            if rule.dport is defined
+%              for dport in ( rule.dport is string | ternary ([rule.dport], rule.dport) )
+-A INPUT -s {{ srcip }} -p {{ proto }} {{ newstate }} --dport {{ dport }} {{ comment }} -j {{ target }}
+%              endfor
+%            else
+-A INPUT -s {{ srcip }} -p {{ proto }} {{ newstate }} {{ comment }} -j {{ target }}
+%            endif
+%          endfor
+%        else
+-A INPUT -s {{ srcip }} {{ newstate }} {{ comment }} -j {{ target }}
+%        endif
+%      endfor
+%    else
+%      if rule.proto is defined
+%        for proto in (rule.proto is string | ternary ([rule.proto], rule.proto) )
+%          if rule.dport is defined
+%            for dport in ( rule.dport is string | ternary ([rule.dport], rule.dport) )
+-A INPUT -p {{ proto }} {{ newstate }} --dport {{ dport }} {{ comment }} -j {{ target }}
+%            endfor
+%          else
+-A INPUT -p {{ proto }} {{ newstate }} {{ comment }} -j {{ target }}
+%          endif
+%        endfor
+%      else
+-A INPUT {{ newstate }} {{ comment }} -j {{ target }}
+%      endif
+%    endif
+%  endfor
+{{ '' }}
+
+% if output_final_rules | length > 0
+# OUTPUT Chain
+%  endif
+
+%  for rule in output_final_rules
+%    set target = rule.target | default('ACCEPT')
+%    if rule.state is defined
+%      if rule.state == ''
+%        set newstate = ''
+%      else
+%        set newstate = '-m state --state ' + rule.state
+%      endif
+%    else
+%      set newstate = '-m state --state NEW'
+%    endif
+
+{{ '' }}
+%    if rule.comment is defined and rule.comment != ""
+%      set comment = '-m comment --comment \"' + rule.comment + '\"'
+%    else
+%      set comment = ''
+%    endif
+
+# OUTPUT: {{ comment }}
+%    if rule.raw is defined
+-A OUTPUT {{ rule.raw }}
+%    elif rule.destination is defined
+%      for destip in (rule.destination is string | ternary ([rule.destination], rule.destination) )
+%        if rule.proto is defined
+%          for proto in (rule.proto is string | ternary ([rule.proto], rule.proto) )
+%            if rule.dport is defined
+%              for dport in ( rule.dport is string | ternary ([rule.dport], rule.dport) )
+-A OUTPUT -d {{ destip }} -p {{ proto }} {{ newstate }} --dport {{ dport }} {{ comment }} -j {{ target }}
+%              endfor
+%            else
+-A OUTPUT -d {{ destip }} -p {{ proto }} {{ newstate }} {{ comment }} -j {{ target }}
+%            endif
+%          endfor
+%        else
+-A OUTPUT -d {{ destip }} {{ newstate }} {{ comment }} -j {{ target }}
+%        endif
+%      endfor
+%    else
+%      if rule.proto is defined
+%        for proto in (rule.proto is string | ternary ([rule.proto], rule.proto) )
+%          if rule.dport is defined
+%            for dport in ( rule.dport is string | ternary ([rule.dport], rule.dport) )
+-A OUTPUT -p {{ proto }} {{ newstate }} --dport {{ dport }} {{ comment }} -j {{ target }}
+%            endfor
+%          else
+-A OUTPUT -p {{ proto }} {{ newstate }} {{ comment }} -j {{ target }}
+%          endif
+%        endfor
+%      else
+-A OUTPUT {{ newstate }} {{ comment }} -j {{ target }}
+%      endif
+%    endif
+%  endfor
+COMMIT
+

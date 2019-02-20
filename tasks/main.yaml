@@ -1,0 +1,58 @@
+---
+- name: installa pkg iptables
+  tags:
+  - package
+  yum:
+    name:
+    - iptables
+    - iptables-services
+    state: present
+
+- name: disabilita firewalld
+  tags:
+  - service
+  service:
+    name: firewalld
+    enabled: false
+
+- name: abilita iptables-service
+  tags:
+  - service
+  service:
+    name: iptables
+    enabled: true
+
+- name: check for input roles validity
+  tags:
+  - template
+  fail: 
+    msg: "Default INPUT policy is DENY/REJECT with no rules, risk of lockdown."
+  when: ' input_rule_default_target != "ACCEPT" and input_rules | length == 0 '
+  
+- name: check for output roles validity
+  tags:
+  - template
+  fail: 
+    msg: "Default OUTPUT policy is DENY/REJECT with no rules, risk of lockdown."
+  when: ' output_rule_default_target != "ACCEPT" and output_rules | length == 0 '
+  
+
+- name: prepara file regole iptables
+  tags:
+  - template
+  template:
+    src: iptables.j2
+    dest: /etc/sysconfig/iptables
+    backup: true
+    validate: "/sbin/iptables-restore -vt %s"
+  register: iptables_config
+
+- name: riavvia iptables
+#  tags:
+#  - template
+  service:
+    name: iptables
+    state: restarted
+  when: iptables_config is changed
+
+

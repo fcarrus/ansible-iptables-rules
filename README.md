@@ -117,3 +117,4 @@ TODOs
 * Implement `forward_rules`.
 * Implement `destination` for INPUT chain and `source` for OUTPUT chain.
 * Implement `interface` specification.
+* Support IPv6 rules for ip6tables

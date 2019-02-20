@@ -74,7 +74,7 @@ The main playbook:
   tasks:
   - tags:
     include_role:
-      name: fcarrus.iptables-rules
+      name: fcarrus.iptables_rules
 ```
 
 The above would produce the following `/etc/sysconfig/iptables` file:

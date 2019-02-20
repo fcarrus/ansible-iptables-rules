@@ -89,19 +89,19 @@ The above would produce the following `/etc/sysconfig/iptables` file:
 
 # INPUT Chain
 
-# INPUT: -m comment --comment "Loopback traffic"
+# INPUT: Loopback traffic
 -A INPUT -i lo -j ACCEPT
 
-# INPUT: -m comment --comment "ICMP traffic"
+# INPUT: ICMP traffic
 -A INPUT -p icmp  -m comment --comment "ICMP traffic" -j ACCEPT
 
-# INPUT: -m comment --comment "Return traffic"
+# INPUT: Return traffic
 -A INPUT -m state --state ESTABLISHED,RELATED -m comment --comment "Return traffic" -j ACCEPT
 
-# INPUT: -m comment --comment "Allow SSH"
+# INPUT: Allow SSH
 -A INPUT -p tcp -m state --state NEW -m comment --comment "Allow SSH" -j ACCEPT
 
-# INPUT: -m comment --comment "Allow Web traffic from my LAN"
+# INPUT: Allow Web traffic from my LAN
 -A INPUT -s 192.168.1.0/24 -p tcp -m state --state NEW --dport 80 -m comment --comment "Allow Web traffic from my LAN" -j ACCEPT
 -A INPUT -s 192.168.1.0/24 -p tcp -m state --state NEW --dport 443 -m comment --comment "Allow Web traffic from my LAN" -j ACCEPT
 

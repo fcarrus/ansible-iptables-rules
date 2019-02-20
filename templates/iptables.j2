@@ -28,7 +28,7 @@
 %      set comment = ''
 %    endif
 
-# INPUT: {{ comment }}
+# INPUT: {{ rule.comment if rule.comment is defined and rule.comment != "" else "-" }}
 %    if rule.raw is defined
 -A INPUT {{ rule.raw }}
 %    elif rule.source is defined
@@ -88,7 +88,7 @@
 %      set comment = ''
 %    endif
 
-# OUTPUT: {{ comment }}
+# OUTPUT: {{ rule.comment if rule.comment is defined and rule.comment != "" else "-" }}
 %    if rule.raw is defined
 -A OUTPUT {{ rule.raw }}
 %    elif rule.destination is defined

@@ -25,17 +25,16 @@
 - name: check for input roles validity
   tags:
   - template
-  fail: 
+  fail:
     msg: "Default INPUT policy is DENY/REJECT with no rules, risk of lockdown."
   when: ' input_rule_default_target != "ACCEPT" and input_rules | length == 0 '
-  
+
 - name: check for output roles validity
   tags:
   - template
-  fail: 
+  fail:
     msg: "Default OUTPUT policy is DENY/REJECT with no rules, risk of lockdown."
   when: ' output_rule_default_target != "ACCEPT" and output_rules | length == 0 '
-  
 
 - name: prepara file regole iptables
   tags:
@@ -54,5 +53,3 @@
     name: iptables
     state: restarted
   when: iptables_config is changed
-
-
